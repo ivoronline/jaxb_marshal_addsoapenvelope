@@ -4,8 +4,10 @@ import javax.xml.bind.Marshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
@@ -37,6 +39,9 @@ public class MarshalEnvelope {
     SOAPMessage soapMessage = MessageFactory.newInstance().createMessage();
                 soapMessage.getSOAPBody().addDocument(document);
 
+    //CONVERT SOAP MESSAGE TO DOCUMENT
+    Document documentSOAP = SOAPMessagetoDocument(soapMessage);   //Not used. Just to demonstrate.
+
     //CONVERT SOAP MESSAGE TO OUTPUT STREAM
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                           soapMessage.writeTo(outputStream);
@@ -50,6 +55,22 @@ public class MarshalEnvelope {
     FileOutputStream  fos = new FileOutputStream(file);
                       fos.write(outputStream.toByteArray());
                       fos.flush();
+
+  }
+
+  //=======================================================================================
+  // SOAP MESSAGE TO DOCUMENT
+  //=======================================================================================
+  public static Document SOAPMessagetoDocument(SOAPMessage soapMsg) throws Exception {
+
+    Source             src         = soapMsg.getSOAPPart().getContent();
+    TransformerFactory tf          = TransformerFactory.newInstance();
+    Transformer        transformer = tf.newTransformer();
+    DOMResult          result      = new DOMResult();
+                       transformer.transform(src, result);
+    Document           document    = (Document) result.getNode();
+
+    return document;
 
   }
 
